@@ -8,7 +8,8 @@
 ![](./sirst/test_image_0.png)
 ![](./sirst/train_image_0.png)
 
-## [Usage]
+
+## [Usage](#Infrared-Target-Detection-by-Segmentation)
 
 ### Training
 ```python
@@ -27,7 +28,7 @@ python main.py evaluate
 python main.py vis_dl
 ```
 
-## [Datasets]
+## [Datasets](#Infrared-Target-Detection-by-Segmentation)
 - SIRST dataset is available at [SIRST](https://github.com/YimianDai/sirst).
 
 ## More Configs in main.py
