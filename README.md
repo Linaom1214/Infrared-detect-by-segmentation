@@ -34,3 +34,8 @@ python main.py vis_dl
 ## More Configs in main.py
 
 ## Model Weights
+
+FCN  [weights](https://github.com/Linaom1214/Infrared-detect-by-segmentation/releases/download/v0.1/fcn_best.pt)
+
+Unet [weights](https://github.com/Linaom1214/Infrared-detect-by-segmentation/releases/download/v0.1/unet_best.pt)
+
