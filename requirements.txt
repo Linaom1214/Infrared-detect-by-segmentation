@@ -1,0 +1,4 @@
+tensorboard
+numpy
+torchsummary
+scikit-image
