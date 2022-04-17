@@ -5,8 +5,8 @@
 # 基于图像分割的红外弱小目标检测算法
 # Infrared Target Detection by Segmentation (Deeplearing Method)
 ## support **Unet** and **FCN** 
-![](./sirst/test_image_0.png)
-![](./sirst/train_image_0.png)
+![](./images/test_image_0.png)
+![](./images/train_image_0.png)
 
 
 ## [Usage](#Infrared-Target-Detection-by-Segmentation)

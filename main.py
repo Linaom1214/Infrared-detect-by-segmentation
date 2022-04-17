@@ -16,6 +16,7 @@ from torch import optim
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torchvision.transforms.functional import to_pil_image
 from torchvision import transforms
+from torchvision.transforms.functional import to_pil_image
 from torchvision.utils import save_image
 
 from net.Unet import Unet
@@ -31,7 +32,7 @@ class App(object):
         self.model = self.get_model()
         self.init_epoch = 0  # 初始步数
         self.epochs = 40  # 训练总轮数
-        self.ckpt = '%s_best.pt' % self.model_type  # 预训练模型保存位置
+        self.ckpt = 'weights/%s_best.pt' % self.model_type  # 预训练模型保存位置
         self.pred_train = True
         self.dataset_dir = './sirst'
         self.train_index = open('./sirst/idx_320/train.txt').readlines()
@@ -173,6 +174,24 @@ class App(object):
             plt.imsave('test_image_%d.png' % i, vis)
             break
 
+    def single(self, infer_dir):
+        self.model.load_state_dict(torch.load(self.ckpt))
+        if torch.cuda.is_available():
+            self.model = self.model.cuda()
+        TF = transforms.Compose([
+            transforms.Grayscale(),
+            transforms.Resize((256, 256)),
+            transforms.ToTensor(),
+        ])
+        image = Image.open(infer_dir)
+        tensor_img = TF(image)
+        tensor_img = torch.unsqueeze(tensor_img, 0)
+        if torch.cuda.is_available():
+            tensor_img = tensor_img.cuda()
+        pred = self.model(tensor_img)
+        save_image(pred, 'images/pred.png')
+
+
     @staticmethod
     def set_seed():
         torch.manual_seed(1024)
@@ -190,27 +209,32 @@ class App(object):
                 return Unet(1)
             elif self.model_type == 'fcn':
                 return fcn(1)
+            print('load', self.model_type, 'model')
         else:
             ValueError("Now only sport Unet FCN")
 
 
 if __name__ == "__main__":
 
-    type = sys.argv[1]
+    # type = sys.argv[1]
 
     application = App()
 
-    if type == 'train':
-        print("Strat Train Total Epoch %s" % application.epochs)
-        application.train()
-    elif type == 'test':
-        print('start test ')
-        path  = sys.argv[2]
-        application.test(path)
-    elif type == 'evaluate':
-        print("Strat evaluate ")
-        application.evaluate()
-    elif type == 'vis_dl':
-        application.vis_dl()
-    else:
-        ValueError("No Match Command!")
+    application.single('sirst/Misc_1.png')
+
+    # if type == 'train':
+    #     print("Strat Train Total Epoch %s" % application.epochs)
+    #     application.train()
+    # elif type == 'test':
+    #     print('start test ')
+    #     path  = sys.argv[2]
+    #     application.test(path)
+    # elif type == 'evaluate':
+    #     print("Strat evaluate ")
+    #     application.evaluate()
+    # elif type == 'vis_dl':
+    #     application.vis_dl()
+    # else:
+    #     ValueError("No Match Command!")
+    
+    
