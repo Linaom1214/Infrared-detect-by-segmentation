@@ -175,7 +175,7 @@ class App(object):
             break
 
     def single(self, infer_dir):
-        self.model.load_state_dict(torch.load(self.ckpt))
+        self.model.load_state_dict(torch.load(self.ckpt, map_location=torch.device('cpu')))
         if torch.cuda.is_available():
             self.model = self.model.cuda()
         TF = transforms.Compose([
