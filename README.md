@@ -8,6 +8,8 @@
 ![](./images/test_image_0.png)
 ![](./images/train_image_0.png)
 
+## 新增在线预测Demo
+
 
 ## [Usage](#Infrared-Target-Detection-by-Segmentation)
 
