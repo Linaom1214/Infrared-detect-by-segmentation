@@ -9,7 +9,7 @@
 ![](./images/train_image_0.png)
 
 ## 新增在线预测Demo
-
+[Demo](https://share.streamlit.io/linaom1214/infrared-detect-by-segmentation/display.py)
 
 ## [Usage](#Infrared-Target-Detection-by-Segmentation)
 
