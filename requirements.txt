@@ -1,4 +1,12 @@
-tensorboard
-numpy
-torchsummary
-scikit-image
+scikit-image==0.18.1
+scikit-learn==0.19.2
+scipy==1.6.3
+sklearn==0.0
+streamlit==1.8.1
+submitit==1.4.0
+tensorboard==2.7.0
+timm==0.4.12
+torch==1.8.1
+torchvision==0.9.1
+tqdm==4.62.3
+
