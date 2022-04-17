@@ -216,25 +216,21 @@ class App(object):
 
 if __name__ == "__main__":
 
-    # type = sys.argv[1]
-
+    type = sys.argv[1]
     application = App()
-
-    application.single('sirst/Misc_1.png')
-
-    # if type == 'train':
-    #     print("Strat Train Total Epoch %s" % application.epochs)
-    #     application.train()
-    # elif type == 'test':
-    #     print('start test ')
-    #     path  = sys.argv[2]
-    #     application.test(path)
-    # elif type == 'evaluate':
-    #     print("Strat evaluate ")
-    #     application.evaluate()
-    # elif type == 'vis_dl':
-    #     application.vis_dl()
-    # else:
-    #     ValueError("No Match Command!")
+    if type == 'train':
+        print("Strat Train Total Epoch %s" % application.epochs)
+        application.train()
+    elif type == 'test':
+        print('start test ')
+        path  = sys.argv[2]
+        application.test(path)
+    elif type == 'evaluate':
+        print("Strat evaluate ")
+        application.evaluate()
+    elif type == 'vis_dl':
+        application.vis_dl()
+    else:
+        ValueError("No Match Command!")
     
     
