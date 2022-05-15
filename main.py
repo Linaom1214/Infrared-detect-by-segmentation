@@ -4,11 +4,13 @@ import glob
 import os
 from datetime import datetime
 from copy import deepcopy
+from torchmetrics import AUC
 from tqdm import tqdm
 from skimage.segmentation import mark_boundaries
 import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
+from scipy.integrate import simps
 import torch
 from torch.utils.tensorboard import SummaryWriter
 from torch.utils.data import DataLoader
@@ -18,6 +20,7 @@ from torchvision.transforms.functional import to_pil_image
 from torchvision import transforms
 from torchvision.transforms.functional import to_pil_image
 from torchvision.utils import save_image
+from zmq import device
 
 from net.Unet import Unet
 from net.FCN import fcn
@@ -32,13 +35,14 @@ class App(object):
         self.model = self.get_model()
         self.init_epoch = 0  # 初始步数
         self.epochs = 40  # 训练总轮数
+        self.image_size =[256 , 256]
         self.ckpt = 'weights/%s_best.pt' % self.model_type  # 预训练模型保存位置
         self.pred_train = True
         self.dataset_dir = './sirst'
         self.train_index = open('./sirst/idx_320/train.txt').readlines()
         self.test_index = open('./sirst/idx_320/test.txt').readlines()
         self.batch_size = 64
-        self.train_dl, self.test_dl = self.generate_ds()
+        self.train_dl, self.test_dl = self.generate_ds(self.image_size)
         self.optimizer = optim.Adam(self.model.parameters(), lr=3e-4)
         self.lr_stp = ReduceLROnPlateau(
         self.optimizer, mode='min', factor=0.5, patience=5, verbose=1)
@@ -90,7 +94,7 @@ class App(object):
         self.model.load_state_dict(torch.load(self.ckpt))
         if torch.cuda.is_available():
             self.model = self.model.cuda()
-        test_ds = InfraredDataset(self.test_index)
+        test_ds = InfraredDataset(self.dataset_dir, self.test_index)
         test_dl = DataLoader(test_ds, batch_size=1,
                              shuffle=False, collate_fn=collect_batch)
         for i, (xb, yb) in enumerate(tqdm(test_dl)):
@@ -98,11 +102,19 @@ class App(object):
                 xb = xb.cuda()
                 yb = yb.cuda()
             output = self.model(xb)
-            save_image([output[0], xb[0], yb[0]], f'{self.infer_dir}/pred_%d.jpg' % i)
+            # save_image([output[0], xb[0], yb[0]], f'{self.infer_dir}/pred_%d.jpg' % i)
             self.pd_fa.update(output.cpu().detach().numpy(),
                               yb.cpu().detach().numpy())
+            self.roc.update(output,
+                            yb)
+        ture_positive_rate, false_positive_rate, recall, precision= self.roc.get()
+        precision[-1] = 1.0
+        
+        map = simps(recall, precision, dx=0.001)
 
         FA, PD = self.pd_fa.get(img_num=len(test_ds))
+        AUC = simps(recall, precision, dx=0.001)
+
         for i in range(10):
             with open('%s_result_.txt' % self.model_type, 'a') as f:
                 if i == 0:
@@ -114,6 +126,17 @@ class App(object):
                 f.write(info)
         print('Probablity of detection %.3f %% False-alarm ratio %.3f %% ' %
               (PD[0] * 100, FA[0] * 100))
+        plt.subplot(1, 2, 1)
+        plt.plot(precision, recall, label="mAP%.3f" % map)
+        plt.xlabel('Precision')
+        plt.ylabel('Recall')
+        plt.legend()
+        plt.subplot(1, 2, 2)
+        plt.plot(false_positive_rate, ture_positive_rate, label="AUC%.3f" % AUC)
+        plt.xlabel('True-positive rate')
+        plt.ylabel('False-positive rate')
+        plt.legend()
+        plt.show()
 
     def test(self, infer_dir):
         self.model.load_state_dict(torch.load(self.ckpt))
@@ -132,7 +155,7 @@ class App(object):
             transforms.ToTensor(),
         ])
 
-        infer_imgs = glob.glob('%s/*.png' % infer_dir)
+        infer_imgs = glob.glob('%s/*.bmp' % infer_dir)
 
         for path in tqdm(infer_imgs):
             image = Image.open(path)
@@ -143,9 +166,9 @@ class App(object):
             pred = self.model(tensor_img)
             save_image(pred, path.replace(infer_dir, save_dir))
 
-    def generate_ds(self):
-        train_ds = InfraredDataset(self.dataset_dir, self.train_index)
-        test_ds = InfraredDataset(self.dataset_dir, self.test_index)
+    def generate_ds(self, image_size):
+        train_ds = InfraredDataset(self.dataset_dir, self.train_index, image_size[0])
+        test_ds = InfraredDataset(self.dataset_dir, self.test_index, image_size[0])
         train_dl = DataLoader(
             train_ds, batch_size=self.batch_size, shuffle=True, collate_fn=collect_batch, num_workers=8)
         test_dl = DataLoader(test_ds, batch_size=self.batch_size,
@@ -180,7 +203,7 @@ class App(object):
             self.model = self.model.cuda()
         TF = transforms.Compose([
             transforms.Grayscale(),
-            transforms.Resize((256, 256)),
+            transforms.Resize((int(self.image_size[0]), int(self.image_size[1]))),
             transforms.ToTensor(),
         ])
         image = Image.open(infer_dir)
@@ -190,6 +213,26 @@ class App(object):
             tensor_img = tensor_img.cuda()
         pred = self.model(tensor_img)
         save_image(pred, 'images/pred.png')
+    
+    def export_onnx(self):
+        import onnx
+        from onnxsim import simplify
+        model = self.model
+        print("ONNX export start, Version %s" % onnx.__version__)
+        model.load_state_dict(torch.load(self.ckpt))
+        model.eval()
+        dummy_input = torch.randn(1, 1, self.image_size[0], self.image_size[1])
+        onnx_name = self.ckpt.replace('.pt', '.onnx')
+        torch.onnx.export(
+            model, dummy_input, onnx_name, verbose=True, opset_version=13 ,input_names=['images'], output_names=['output'])
+        print('start simplify')
+        onnx_model = onnx.load(onnx_name)
+        onnx.checker.check_model(onnx_model)
+        print(onnx.helper.printable_graph(onnx_model.graph))
+        model_simp, check = simplify(onnx_model)
+        assert check, "Simplified ONNX model could not be validated"
+        onnx.save(model_simp, onnx_name)
+        print('finished exporting onnx')
 
 
     @staticmethod
@@ -215,21 +258,26 @@ class App(object):
 
 
 if __name__ == "__main__":
-
-    type = sys.argv[1]
-    application = App()
+    # 0 main 1 unet 2 fcn
+    type = sys.argv[2]
+    application = App(sys.argv[1])
     if type == 'train':
         print("Strat Train Total Epoch %s" % application.epochs)
         application.train()
     elif type == 'test':
         print('start test ')
-        path  = sys.argv[2]
+        path  = sys.argv[-1]
         application.test(path)
     elif type == 'evaluate':
         print("Strat evaluate ")
         application.evaluate()
     elif type == 'vis_dl':
         application.vis_dl()
+    elif type == 'single':
+        infer_dir = sys.argv[-1]
+        application.single(infer_dir)
+    elif type == 'export':
+        application.export_onnx()
     else:
         ValueError("No Match Command!")
     

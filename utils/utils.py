@@ -63,7 +63,7 @@ def loss_epoch(epoch, model, loss_func, dl, sanity_check=False, opt=None, roc=No
                 xb, yb = xb.cuda(), yb.cuda()
             output = model(xb)
 
-            # if opt is None:
+            # if roc is None:
             #     roc.update(output, yb)
             #     ture_positive_rate, false_positive_rate, recall, precision= roc.get()
             #     with open("log.txt",'a') as f:

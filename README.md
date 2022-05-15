@@ -7,7 +7,7 @@
 ## support **Unet** and **FCN** 
 ![](./images/test_image_0.png)
 ![](./images/train_image_0.png)
-
+## 2022.5.15 增加onnx模型导出
 ## 新增在线预测Demo
 [Demo](https://share.streamlit.io/linaom1214/infrared-detect-by-segmentation/display.py)
 
@@ -15,19 +15,19 @@
 
 ### Training
 ```python
-python main.py train
+python main.py unet train
 ```
 ### Test
 ```python
-python main.py test image_dir
+python main.py unet test image_dir
 ```
 ### Evaluation
 ```python
-python main.py evaluate
+python main.py unet evaluate
 ```
 ### Visual DataSet 
 ```python
-python main.py vis_dl
+python main.py unet  vis_dl
 ```
 
 ## [Datasets](#Infrared-Target-Detection-by-Segmentation)
@@ -36,7 +36,6 @@ python main.py vis_dl
 ## More Configs in main.py
 
 ## TODO
-- [ ] onnx export 
 - [ ] TensorRT Deploy
 
 ## Model Weights

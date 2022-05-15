@@ -13,12 +13,12 @@ import os
 
 
 class InfraredDataset(Dataset):
-    def __init__(self, dataset_dir, image_index):
+    def __init__(self, dataset_dir, image_index, image_size=256):
         super(InfraredDataset, self).__init__()
         self.dataset_dir = dataset_dir
         self.image_index = image_index
         self.transformer = transforms.Compose([
-            Resize((256, 256)),
+            Resize((int(image_size), int(image_size))),
             Grayscale(),
             ToTensor(),
             RandomHorizontalFlip(0.5),
