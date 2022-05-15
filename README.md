@@ -29,6 +29,10 @@ python main.py unet evaluate
 ```python
 python main.py unet  vis_dl
 ```
+### Export Onnx
+```python
+python main.py unet  export
+```
 
 ## [Datasets](#Infrared-Target-Detection-by-Segmentation)
 - SIRST dataset is available at [SIRST](https://github.com/YimianDai/sirst).
