@@ -4,7 +4,6 @@ import glob
 import os
 from datetime import datetime
 from copy import deepcopy
-from torchmetrics import AUC
 from tqdm import tqdm
 from skimage.segmentation import mark_boundaries
 import matplotlib.pyplot as plt
@@ -20,7 +19,6 @@ from torchvision.transforms.functional import to_pil_image
 from torchvision import transforms
 from torchvision.transforms.functional import to_pil_image
 from torchvision.utils import save_image
-from zmq import device
 
 from net.Unet import Unet
 from net.FCN import fcn
