@@ -188,7 +188,8 @@ class PD_FA():
         self.target = np.zeros(self.bins + 1)
 
     def update(self, preds, labels):
-
+        preds = preds* 255
+        labels = labels * 255
         for iBin in range(self.bins + 1):
             score_thresh = iBin * (255 / self.bins)
             predits = np.array(preds > score_thresh).astype('int64')

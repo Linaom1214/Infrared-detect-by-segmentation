@@ -101,7 +101,7 @@ class App(object):
                 yb = yb.cuda()
             output = self.model(xb)
             # save_image([output[0], xb[0], yb[0]], f'{self.infer_dir}/pred_%d.jpg' % i)
-            self.pd_fa.update(output.cpu().detach().numpy(),
+            self.pd_fa.update(output.sigmoid().cpu().detach().numpy(),
                               yb.cpu().detach().numpy())
             self.roc.update(output,
                             yb)
