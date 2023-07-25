@@ -17,7 +17,6 @@ from torch import optim
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torchvision.transforms.functional import to_pil_image
 from torchvision import transforms
-from torchvision.transforms.functional import to_pil_image
 from torchvision.utils import save_image
 
 from net.Unet import Unet
@@ -211,13 +210,14 @@ class App(object):
             tensor_img = tensor_img.cuda()
         pred = self.model(tensor_img)
         pred[pred>0]=1
+        pred[pred<=0]=0
         if torch.cuda.is_available():
-            pred = pred[0][0].cpu().numpy()
+            pred = pred[0][0].cpu().detach().numpy()
         else:
             pred = pred[0][0].numpy()
-        vis = mark_boundaries(np.array(image/255.), np.uint8(pred), color=(1, 1, 0))
+        vis = mark_boundaries(np.array(to_pil_image(tensor_img[0])), np.uint8(pred), color=(1, 1, 0))
         vis = Image.fromarray(np.uint8(255*vis))
-        save_image(vis, 'images/pred.png')
+        vis.save('images/pred.png')
     
     def export_onnx(self):
         import onnx

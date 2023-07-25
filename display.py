@@ -21,6 +21,7 @@ if __name__ == '__main__':
         with st.spinner(text='资源加载中...'):
             st.sidebar.image(uploaded_file)
             picture = Image.open(uploaded_file)
+            picture = picture.resize((256, 256))
             picture = picture.save(f'images/{uploaded_file.name}')
             source = f'images/{uploaded_file.name}'
     else:
@@ -28,7 +29,7 @@ if __name__ == '__main__':
 
 
     if is_valid:
-        image = application.single(csource)
+        image = application.single(source)
         with st.spinner(text='Soure Images'):
             st.image(source)
         with st.spinner(text='Preparing Images'):
