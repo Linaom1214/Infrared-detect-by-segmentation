@@ -215,7 +215,7 @@ class App(object):
             pred = pred[0][0].cpu().numpy()
         else:
             pred = pred[0][0].numpy()
-        vis = mark_boundaries(np.array(image/255.), np.unint8(pred), color=(1, 1, 0))
+        vis = mark_boundaries(np.array(image/255.), np.uint8(pred), color=(1, 1, 0))
         vis = Image.fromarray(np.uint8(255*vis))
         save_image(vis, 'images/pred.png')
     
