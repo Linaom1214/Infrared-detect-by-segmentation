@@ -45,7 +45,7 @@ class App(object):
         self.optimizer, mode='min', factor=0.5, patience=5, verbose=1)
         self.roc = ROCMetric(1, 10)
         self.pd_fa = PD_FA(1, 10)
-        self.tb_writer = SummaryWriter('tb_logs/%s' % self.time_ink())
+        # self.tb_writer = SummaryWriter('tb_logs/%s' % self.time_ink())
         self.infer_dir = 'pred'
         torch.cuda.empty_cache()
 
@@ -214,7 +214,7 @@ class App(object):
         if torch.cuda.is_available():
             pred = pred[0][0].cpu().detach().numpy()
         else:
-            pred = pred[0][0].numpy()
+            pred = pred[0][0].detach().numpy()
         vis = mark_boundaries(np.array(to_pil_image(tensor_img[0])), np.uint8(pred), color=(1, 1, 0))
         vis = Image.fromarray(np.uint8(255*vis))
         vis.save('images/pred.png')
