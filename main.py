@@ -212,9 +212,9 @@ class App(object):
         pred = self.model(tensor_img)
         pred[pred > 0] = 1
         if torch.cuda.is_available():
-            pred = pred[0].numpy()
-        else:
             pred = pred[0].cpu().numpy()
+        else:
+            pred = pred[0].numpy()
         vis = mark_boundaries(np.array(image), pred, color=(1, 1, 0))
         vis = Image.fromarray(np.uint8(255*vis))
         save_image(vis, 'images/pred.png')
