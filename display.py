@@ -4,7 +4,7 @@ import os
 from main import App
 
 if __name__ == '__main__':
-    st.image(['./images/test_image_0.png', './images/train_image_0.png'])
+    # st.image(['./images/test_image_0.png', './images/train_image_0.png'])
     st.write('左侧上传文件')
 
     option = 'unet'
@@ -28,7 +28,9 @@ if __name__ == '__main__':
 
 
     if is_valid:
-        image = application.single(source)
+        image = application.single(csource)
+        with st.spinner(text='Soure Images'):
+            st.image(source)
         with st.spinner(text='Preparing Images'):
             st.image('images/pred.png')
 

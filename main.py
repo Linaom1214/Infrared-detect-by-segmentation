@@ -210,7 +210,14 @@ class App(object):
         if torch.cuda.is_available():
             tensor_img = tensor_img.cuda()
         pred = self.model(tensor_img)
-        save_image(pred, 'images/pred.png')
+        pred[pred > 0] = 1
+        if torch.cuda.is_available():
+            pred = pred[0].numpy()
+        else:
+            pred = pred[0].cpu().numpy()
+        vis = mark_boundaries(np.array(image), pred, color=(1, 1, 0))
+        vis = Image.fromarray(np.uint8(255*vis))
+        save_image(vis, 'images/pred.png')
     
     def export_onnx(self):
         import onnx
