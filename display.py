@@ -29,8 +29,8 @@ if __name__ == '__main__':
 
     if is_valid:
         image = application.single(csource)
-        with st.spinner(text='Soure Images'):
-            st.image(source)
+        # with st.spinner(text='Soure Images'):
+        #     st.image(source)
         with st.spinner(text='Preparing Images'):
             st.image('images/pred.png')
 
