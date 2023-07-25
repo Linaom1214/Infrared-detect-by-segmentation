@@ -210,7 +210,6 @@ class App(object):
         if torch.cuda.is_available():
             tensor_img = tensor_img.cuda()
         pred = self.model(tensor_img)
-        pred[pred > 0] = 1
         if torch.cuda.is_available():
             pred = pred[0].cpu().numpy()
         else:
